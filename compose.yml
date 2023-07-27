@@ -1,0 +1,20 @@
+version: "3"
+services:
+  api:
+    image: danicaceres1998/devsu-python:dev-env
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    volumes:
+      - .:/app
+    ports:
+      - "5002:5000"
+    environment:
+      PORT: 5000
+    healthcheck:
+      test: python healthcheck.py
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
