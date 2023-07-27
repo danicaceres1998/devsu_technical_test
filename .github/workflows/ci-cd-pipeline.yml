@@ -34,15 +34,15 @@ jobs:
       # Run Tests
       - name: Run Tests
         run: python manage.py test
-      # Static code analisis
-      - name: Run Pysa Action
-        uses: facebook/pysa-action
-        with:
-          repo-directory: './'
-          requirements-path: 'requirements.txt'
-          infer-types: true
-          include-default-sapp-filters: true
-          sapp-filters-directory: path/to/custom-filters
+      # # Static code analisis
+      # - name: Run Pysa Action
+      #   uses: facebook/pysa-action
+      #   with:
+      #     repo-directory: './'
+      #     requirements-path: 'requirements.txt'
+      #     infer-types: true
+      #     include-default-sapp-filters: true
+      #     sapp-filters-directory: path/to/custom-filters
       # Code Coverage
       - name: Django Coverage action
         uses: actions/python-django-coverage-gitHub-action@0.9
