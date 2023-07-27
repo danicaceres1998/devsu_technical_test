@@ -1,0 +1,82 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: devsu-python
+  name: devsu-python-mcs
+  labels:
+    app: devsu-python-mcs
+spec:
+  replicas: 2
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  selector:
+    matchLabels:
+      app: devsu-python-mcs
+  template:
+    metadata:
+      name: devsu-python-mcs
+      labels:
+        app: devsu-python-mcs
+    spec:
+      containers:
+        - name: devsu-python-mcs
+          image: danicaceres1998/devsu-python:latest
+          resources:
+            requests:
+              memory: "150Mi"
+              cpu: "150m"
+            limits:
+              memory: "350Mi"
+              cpu: "300m"
+          livenessProbe:
+            httpGet:
+              path: /api/
+              port: devsu-port
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            failureThreshold: 5
+          # readinessProbe:
+          #   httpGet:
+          #     path: /readiness
+          #     port: devsu-port
+          #   initialDelaySeconds: 20
+          #   periodSeconds: 45
+          #   failureThreshold: 5
+          env:
+            - name: PORT
+              value: "5000"
+            - name: PYTHON_ENV
+              value: "production"
+            - name: DB_HOST
+              value: "postgres-devsu"
+            - name: DB_NAME
+              value: "postgres"
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django-secret-key
+                  key: secret-key
+                  optional: false
+            - name: USER_DB
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: USER
+                  optional: false
+            - name: PASSWORD_DB
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: PASSWORD
+                  optional: false
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: devsu-port
+              containerPort: 5000

@@ -1,4 +1,5 @@
 import environ
+from os import environ as os_environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -11,12 +12,20 @@ env.read_env(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+production_env = None
+try:
+    production_env = os_environ['PYTHON_ENV'] == 'production'
+    SECRET_KEY = os_environ['DJANGO_SECRET_KEY'] if production_env else env('DJANGO_SECRET_KEY')
+except KeyError:
+    SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+if production_env:
+    DEBUG = False
+    ALLOWED_HOSTS = ['localhost', 'devsu.local.k8s']
+else:
+    DEBUG = True
+    ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -73,12 +82,23 @@ WSGI_APPLICATION = 'demo.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
+if production_env:
+    db = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os_environ['DB_NAME'], 
+        'USER': os_environ['USER_DB'],
+        'PASSWORD': os_environ['PASSWORD_DB'],
+        'HOST': os_environ['DB_HOST'],
+        'PORT': '5432',
+    }
+else:
+    db = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / env('DATABASE_NAME'),
     }
+
+DATABASES = {
+    'default': db
 }
 
 
