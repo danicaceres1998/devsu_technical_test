@@ -49,19 +49,18 @@ jobs:
       #   with:
       #     minimum-coverage: '80'
       # Docker image build & push  
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      - name: Docker Login
+        uses: docker/login-action@v2.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Git short sha
-        id: short_sha
-        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      - name: Extract branch name
-        id: extract_branch
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: git_context
+        run: |
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
       - name: Build the Docker image
         run: |
           docker build . --file Dockerfile \
-            -t danicaceres1998/devsu-python:${{ steps.extract_branch.outputs.branch }}-${{ steps.short_sha.outputs.short_sha }}
+            -t danicaceres1998/devsu-python:${{ steps.git_context.outputs.branch }}-${{ steps.git_context.outputs.short_sha }}
           docker push danicaceres1998/devsu-python --all-tags
