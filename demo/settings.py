@@ -20,7 +20,7 @@ except KeyError:
     SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if production_env == 'production':
+if production_env:
     DEBUG = False
     ALLOWED_HOSTS = ['localhost', 'devsu.local.k8s']
 else:
@@ -82,12 +82,23 @@ WSGI_APPLICATION = 'demo.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
+if production_env:
+    db = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os_environ['DB_NAME'], 
+        'USER': os_environ['USER_DB'],
+        'PASSWORD': os_environ['PASSWORD_DB'],
+        'HOST': os_environ['DB_HOST'],
+        'PORT': '5432',
+    }
+else:
+    db = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / env('DATABASE_NAME'),
     }
+
+DATABASES = {
+    'default': db
 }
 
 

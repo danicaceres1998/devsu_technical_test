@@ -54,11 +54,27 @@ spec:
               value: "5000"
             - name: PYTHON_ENV
               value: "production"
+            - name: DB_HOST
+              value: "postgres-devsu"
+            - name: DB_NAME
+              value: "postgres"
             - name: DJANGO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: django-secret-key
                   key: secret-key
+                  optional: false
+            - name: USER_DB
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: USER
+                  optional: false
+            - name: PASSWORD_DB
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: PASSWORD
                   optional: false
           imagePullPolicy: IfNotPresent
           ports:
