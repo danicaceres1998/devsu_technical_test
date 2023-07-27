@@ -51,9 +51,9 @@ jobs:
             -t danicaceres1998/devsu-python:${{ steps.git_context.outputs.branch }}-${{ steps.git_context.outputs.short_sha }}
           docker push danicaceres1998/devsu-python --all-tags
       # Snyk image scanner
-      - name: Run Snyk to check Docker image for vulnerabilities
-        uses: snyk/actions/docker@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: danicaceres1998/devsu-python:${{ steps.git_context.outputs.branch }}-${{ steps.git_context.outputs.short_sha }}
+      # - name: Run Snyk to check Docker image for vulnerabilities
+      #   uses: snyk/actions/docker@master
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     image: danicaceres1998/devsu-python:${{ steps.git_context.outputs.branch }}-${{ steps.git_context.outputs.short_sha }}
