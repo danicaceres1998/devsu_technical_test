@@ -55,10 +55,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Git short sha
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        id: short_sha
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Extract branch name
+        id: extract_branch
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
       - name: Build the Docker image
         run: |
           docker build . --file Dockerfile \
-            -t danicaceres1998/devsu-python:${{ github.ref_name }}-${{ steps.vars.outputs.sha_short }}
+            -t danicaceres1998/devsu-python:${{ steps.extract_branch.outputs.branch }}-${{ steps.short_sha.outputs.short_sha }}
           docker push danicaceres1998/devsu-python --all-tags
