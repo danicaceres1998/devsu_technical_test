@@ -75,13 +75,6 @@ jobs:
       - name: Git short sha
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      # Build Docker Image
-      - name: Build the Docker image
-        run: |
-          docker build . --file Dockerfile \
-            -t danicaceres1998/devsu-python:latest \
-            -t danicaceres1998/devsu-python:${{ steps.vars.outputs.sha_short }}
-          docker push danicaceres1998/devsu-python --all-tags
       # Config & Login to GCloud
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1.1.1
@@ -99,5 +92,5 @@ jobs:
       - name: Deploy to DigitalOcean Kubernetes
         run: |
           kubectl set image deployment/devsu-python-mcs \
-            devsu-python-mcs=danicaceres1998/devsu-python:${{ steps.vars.outputs.sha_short }} \
+            devsu-python-mcs=danicaceres1998/devsu-python:main-${{ steps.vars.outputs.sha_short }} \
             -n devsu-python
