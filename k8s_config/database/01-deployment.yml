@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-devsu
+  namespace: devsu-python
+  labels:
+    app: postgres-devsu
+spec:
+  ports:
+    - name: postgres-port
+      port: 5432
+  selector:
+    app: postgres-devsu
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-devsu
+  namespace: devsu-python
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-devsu
+  template:
+    metadata:
+      labels:
+        app: postgres-devsu
+    spec:
+      containers:
+        - name: postgresdb
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "postgres"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: USER
+                  optional: false
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials
+                  key: PASSWORD
+                  optional: false
+          volumeMounts:
+            - mountPath: /var/lib/postgres/data
+              name: db-data
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db-postgres-claim

@@ -1,0 +1,9 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: devsu-path-replacement
+  namespace: default
+spec:
+  replacePathRegex:
+    regex: ^/devsu/(.*)
+    replacement: /$1

@@ -1,8 +1,10 @@
 # This workflow uses actions that are not certified by GitHub.  They are
 # provided by a third-party and are governed by separate terms of service,
 # privacy policy, and support documentation.
-name: "CI Pipeline"
+name: "CI-CD Pipeline"
 on:
+  push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 jobs:
@@ -57,3 +59,45 @@ jobs:
       #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       #   with:
       #     image: danicaceres1998/devsu-python:${{ steps.git_context.outputs.branch }}-${{ steps.git_context.outputs.short_sha }}
+  deploy:
+    if: github.ref_name == 'main'
+    needs: [test]
+    name: "Build and deploy"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Git short sha
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      # Build Docker Image
+      - name: Build the Docker image
+        run: |
+          docker build . --file Dockerfile \
+            -t danicaceres1998/devsu-python:latest \
+            -t danicaceres1998/devsu-python:${{ steps.vars.outputs.sha_short }}
+          docker push danicaceres1998/devsu-python --all-tags
+      # Config & Login to GCloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1.1.1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Set up gcloud Cloud SDK environment
+        uses: google-github-actions/setup-gcloud@v1.1.1
+        with:
+          version: '>= 440.0.0'
+      - name: Install gcloud auth
+        run: gcloud components install gke-gcloud-auth-plugin
+      - name: Connect to the cluster
+        run: gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project cohesive-slate-394401
+      # Deploy to K8s
+      - name: Deploy to DigitalOcean Kubernetes
+        run: |
+          kubectl set image deployment/devsu-python-mcs \
+            devsu-python-mcs=danicaceres1998/devsu-python:${{ steps.vars.outputs.sha_short }} \
+            -n devsu-python

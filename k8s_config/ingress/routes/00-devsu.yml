@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: devsu-route
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`devsu.local.k8s`)
+      kind: Rule
+      services:
+      - name: devsu-python-mcs
+        namespace: devsu-python
+        port: 5000
