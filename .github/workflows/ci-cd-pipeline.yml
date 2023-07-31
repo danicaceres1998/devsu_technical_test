@@ -68,7 +68,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Log in to Docker Hub
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v2.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -89,7 +89,7 @@ jobs:
       - name: Connect to the cluster
         run: gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project cohesive-slate-394401
       # Deploy to K8s
-      - name: Deploy to DigitalOcean Kubernetes
+      - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/devsu-python-mcs \
             devsu-python-mcs=danicaceres1998/devsu-python:main-${{ steps.vars.outputs.sha_short }} \
