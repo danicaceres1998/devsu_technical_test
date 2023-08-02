@@ -2,6 +2,7 @@ version: "3"
 services:
   api:
     image: danicaceres1998/devsu-python:dev-env
+    working_dir: /app
     deploy:
       resources:
         limits:
